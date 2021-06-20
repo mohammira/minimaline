@@ -6,6 +6,7 @@ import Categ from "./Categ";
 import ProdDesc from "./ProdDesc";
 import Axios from 'axios';
 import Auth from '../../services/Auth';
+Axios.defaults.withCredentials = true;
 
 class ViewMenu extends Component {
     constructor(){
@@ -31,7 +32,7 @@ class ViewMenu extends Component {
     }
     async showProducts(categ_id){
         if(categ_id!=="empty"){
-            let categProds = await Axios.get(`https://minimaline-test.herokuapp.com/menu-info/${categ_id}`,{headers: Auth.header()});
+            let categProds = await Axios.get(`https://minimaline-server.herokuapp.com/menu-info/${categ_id}`,{headers: Auth.header()});
             this.setState({
                 prods: categProds.data,
                 clicked: false,
@@ -42,7 +43,7 @@ class ViewMenu extends Component {
     async componentDidMount(){
         document.title = "MinimaLine | View Menu"
         console.log("view menu page")
-        let categs = await Axios.get('https://minimaline-test.herokuapp.com/display-category',{headers: Auth.header()});
+        let categs = await Axios.get('https://minimaline-server.herokuapp.com/display-category',{headers: Auth.header()});
         if(JSON.stringify(categs.data)==='{}'){
             this.showProducts("empty")
         }
@@ -117,6 +118,10 @@ const EditButton = styled.div`
     background: white;
     z-index: 1;
 
+    @media screen and (max-width: 1180px) {
+        width: 20%;
+    }
+
     button{ 
         outline: none;
         border: none;
@@ -133,6 +138,9 @@ const EditButton = styled.div`
         font-family: "Work Sans";
         font-size: 90%;
         font-weight: bold;
+        @media screen and (max-width: 1180px) {
+         left:0;
+        }
 
         &:hover {
             transform: translateY(-4px);
@@ -152,6 +160,10 @@ const Nav = styled.div`
   align-items: center;
   background: white;
   z-index: 1;
+
+    @media screen and (max-width: 1180px) {
+        width: 75%;
+    }
 `;
 
 const ArrowWrapper = styled.div`
@@ -190,11 +202,19 @@ const ProdGrid = styled.div`
         display: grid;
         gap: 2rem;
         z-index: 0;
-        /* grid-template-columns: repeat(auto-fit, minmax(177px, 1fr)); */
-        grid-template-columns: repeat(4, 220px);
+        grid-template-columns: repeat(5, 220px);
 
-        @media screen and (max-width: 1024px) {
-            gap: 1.5rem;
+        @media screen and (max-width: 1680px) {
+            grid-template-columns: repeat(4, 240px);
+        }
+
+        @media screen and (max-width: 1460px) {
+            grid-template-columns: repeat(3, 240px);
+        }
+
+        @media screen and (max-width: 1180px) {
+            gap: 2rem;
+            grid-template-columns: repeat(2, 265px);
         }
     }
 
@@ -217,10 +237,11 @@ const ProdGrid = styled.div`
             font-size: 0.9rem;
             margin-top: 0.25;
         }
-
         @media screen and (max-width: 1024px) {
             width: 70%;
-            /* padding: 1rem 2rem; */
+        }
+        @media screen and (max-width: 1180px) {
+            width: 200px;
         }
     }
     .unclicked{
@@ -243,14 +264,24 @@ const ProdGrid = styled.div`
             font-size: 0.9rem;
             margin-top: 0.25;
         }
-        @media screen and (max-width: 1024px) {
-            width: 70%;
-            /* padding: 1rem 2rem; */
-        }
+
     }
     .image{
-        height: 150px;
-        width: 150px;
+        height: 160px;
+        width: 160px;
+
+        @media screen and (max-width: 1680px) {
+            height: 180px;
+            width: 180px;
+        }
+
+        @media screen and (max-width: 1180px) {
+            height: 200px;
+            width: 200px;
+        }
+    }
+    @media screen and (max-width: 1024px) {
+        width: 70%;
     }
 `;
 

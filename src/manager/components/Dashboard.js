@@ -7,6 +7,7 @@ import {Link,Redirect} from 'react-router-dom';
 import Modal from 'react-modal';
 import Axios from 'axios';
 import Auth from '../../services/Auth';
+Axios.defaults.withCredentials = true;
 
 class App extends Component {
   constructor(props) {
@@ -23,7 +24,7 @@ class App extends Component {
   async componentDidMount(){
     document.title = "MinimaLine | Dashboard";
       console.log("dashboard")
-      await Axios.get(`https://minimaline-test.herokuapp.com/account-info`,{headers: Auth.header()})
+      await Axios.get(`https://minimaline-server.herokuapp.com/account-info`,{headers: Auth.header()})
       .then((response)=>{
           console.log(response.data[0])
           this.setState({
@@ -277,8 +278,8 @@ const StyledLink = styled(Link)`
   }
   animation: fadeInY 2s;
 
-  @media screen and (max-width: 1230px) {
-    height: 310px;
+  @media screen and (max-width: 1280px) {
+    height: 290px;
     width: 250px;
     margin: 50px 40px;
     .icon{
@@ -338,8 +339,8 @@ const Option = styled.div`
   }
   animation: fadeInY 2s;
 
-  @media screen and (max-width: 1230px) {
-    height: 310px;
+  @media screen and (max-width: 1280px) {
+    height: 290px;
     width: 250px;
     margin: 50px 40px;
     .icon{

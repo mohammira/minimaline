@@ -45,7 +45,7 @@ class StoreReg extends Component{
     e.preventDefault();
     if(this.state.logo){  // a file was uploaded
       // get secure upload url
-      await Axios.get('https://minimaline-test.herokuapp.com/request-upload')
+      await Axios.get('https://minimaline-server.herokuapp.com/request-upload')
         .then(response => {
           console.log(response.data.url)
           this.setState({upload_url: response.data.url})
@@ -163,6 +163,10 @@ const Form = styled.form`
     align-items: center;
     margin-top: 170px;
     margin-right: 50px;
+
+    @media screen and (max-width: 1280px) {
+      margin-top: 90px;
+    }
 
     h2{
       color: #666666;
@@ -294,6 +298,9 @@ const InputStatus = styled.div`
 const LogoWrapper = styled.div`
   position: fixed;
   margin-top: 80px;
+  @media screen and (max-width: 1280px) {
+    margin-top: 30px;
+  }
   img{
       height: 6rem;
       margin-bottom: -20px;
