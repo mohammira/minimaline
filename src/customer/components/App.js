@@ -12,7 +12,7 @@ const App = () => {
         <Wrapper>
           <Switch>
             {/* <Main /> */}
-            <Route path="/customer" exact component={Main} />
+            <Route path="/store/:id" exact component={Main} />
             <Route path="/prod-select" exact component={ProdSelect} />
             <Route path="/checkout" exact component={Checkout} />
             <Route path="/confirmation" exact component={Confirmation} />
@@ -43,3 +43,7 @@ const Wrapper = styled.div`
 export default App;
 
 //#C59C6C
+{/* <Route path="/store/10" exact component={Main} />
+            <Route path="/prod-select" exact component={ProdSelect} />
+            <Route path="/checkout" exact component={Checkout} />
+            <Route path="/confirmation" exact component={Confirmation} /> */}
