@@ -3,23 +3,36 @@ import Main from "./Main";
 import ProdSelect from "./ProdSelect";
 import Checkout from "./Checkout";
 import Confirmation from "./Confirmation";
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route,Redirect} from 'react-router-dom';
+import CustomerFn from '../../services/CustomerFn';
+
+const PrivateRoute = ({component:Component, ...rest}) => {
+  return(
+    <Route
+      {...rest}
+      render={()=>(
+        CustomerFn.validPath() ?
+          <Component/>
+        : <Redirect to="/confirmation"/>
+      )}
+    />
+  )
+}
 
 const App = () => {
   return (
-    <Router>
+    // <Router>
       <Container>
         <Wrapper>
-          <Switch>
-            {/* <Main /> */}
-            <Route path="/store/:id" exact component={Main} />
+          {/* <Switch>
+            <PrivateRoute path="/store/:id" exact component={Main} />
             <Route path="/prod-select" exact component={ProdSelect} />
             <Route path="/checkout" exact component={Checkout} />
-            <Route path="/confirmation" exact component={Confirmation} />
-          </Switch>
+            <Route path="/confirmation" exact component={Confirmation} /> */}
+          {/* </Switch> */}
         </Wrapper>
       </Container>
-    </Router>
+    // </Router>
   );
 };
 
@@ -43,7 +56,3 @@ const Wrapper = styled.div`
 export default App;
 
 //#C59C6C
-{/* <Route path="/store/10" exact component={Main} />
-            <Route path="/prod-select" exact component={ProdSelect} />
-            <Route path="/checkout" exact component={Checkout} />
-            <Route path="/confirmation" exact component={Confirmation} /> */}
