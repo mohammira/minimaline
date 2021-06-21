@@ -15,7 +15,8 @@ class ManageAccount extends Component {
       editing: false, currentAccEdit: null, currentStoreEdit: null,
       user_info: [], username: '', email: '', storename: '',
       manager: '', location: '', successful: false,
-      error: false, error_msg: '', redirect: false
+      error: false, error_msg: '', redirect: false, 
+      logo: null, upload_url: '', logo_url: ''
      }
      this.getUserInfo = this.getUserInfo.bind(this);
      this.navClick = this.navClick.bind(this);
@@ -24,6 +25,9 @@ class ManageAccount extends Component {
      this.editUsername = this.editUsername.bind(this);
      this.editEmail = this.editEmail.bind(this);
      this.editStoreName = this.editStoreName.bind(this);
+     this.editLocation = this.editLocation.bind(this);
+     this.editManager = this.editManager.bind(this);
+     this.editLogo = this.editLogo.bind(this);
   }
   async componentDidMount(){
     document.title = "MinimaLine | Account Management";
@@ -31,12 +35,12 @@ class ManageAccount extends Component {
   }
   async getUserInfo(){
     let user = await Axios.get('https://minimaline-server.herokuapp.com/account-info',{headers: Auth.header()})
-                .catch((error)=> {
-                  console.log(error)
-                  this.setState({redirect: true})
-              })
-    console.log(user.data[0]);
-    this.setState({user_info: user.data[0]})
+        .catch((error)=> {
+          this.setState({redirect: true})
+        })
+    if(!this.state.redirect){
+      this.setState({user_info: user.data[0]})
+    }
   }
   navClick(id){
     if(id==="account"){
@@ -50,6 +54,7 @@ class ManageAccount extends Component {
       this.setState({
         account: false,
         store: true,
+        successful: false,
         currentNav: "store"
       })
     }
@@ -69,21 +74,24 @@ class ManageAccount extends Component {
     })
   }
   closeEdit(){
-    this.setState({
-      editing: false,
-      // currentAccEdit: false,
-      // currentStoreEdit: false
-    })
+    this.setState({editing: false})
   }
   handleChange(e){
     this.setState({
       [e.target.name]: e.target.value
     })
   }
-  editEmail(e){
+  handleUpload(e){
+    this.setState({ 
+      logo: e.target.files[0],
+      editing: true,
+      currentStoreEdit: 4
+    })
+  }
+  async editEmail(e){
     e.preventDefault();
     const data = {email: this.state.email};
-    Axios.post('https://minimaline-server.herokuapp.com/edit-email', data, {headers: Auth.header()}).then((response) => {
+    await Axios.post('https://minimaline-server.herokuapp.com/edit-email', data, {headers: Auth.header()}).then((response) => {
       if(response.data.errors){
         this.setState({
           error: true,
@@ -100,10 +108,10 @@ class ManageAccount extends Component {
       }
     })
   }
-  editUsername(e){
+  async editUsername(e){
     e.preventDefault();
     const data = {username: this.state.username};
-    Axios.post('https://minimaline-server.herokuapp.com/edit-username', data, {headers: Auth.header()}).then((response) => {
+    await Axios.post('https://minimaline-server.herokuapp.com/edit-username', data, {headers: Auth.header()}).then((response) => {
       if(response.data.errors){
         this.setState({
           error: true,
@@ -120,10 +128,10 @@ class ManageAccount extends Component {
       }
     })
   }
-  editStoreName(e){
+  async editStoreName(e){
     e.preventDefault();
     const data = {storename: this.state.storename};
-    Axios.post('https://minimaline-server.herokuapp.com/edit-storename', data, {headers: Auth.header()}).then((response) => {
+    await Axios.post('https://minimaline-server.herokuapp.com/edit-storename', data, {headers: Auth.header()}).then((response) => {
       if(response.data.errors){
         this.setState({
           error: true,
@@ -140,6 +148,83 @@ class ManageAccount extends Component {
       }
     })
   }
+  async editManager(e){
+    e.preventDefault();
+    const data = {manager: this.state.manager};
+    await Axios.post('https://minimaline-server.herokuapp.com/edit-manager', data, {headers: Auth.header()}).then((response) => {
+      if(response.data.errors){
+        this.setState({
+          error: true,
+          error_msg: response.data.errors[0].msg
+        })
+      }else{
+        this.closeEdit();
+        this.getUserInfo();
+        this.setState({
+          successful: true,
+          error: false,
+          manager: ''
+        })
+      }
+    })
+  }
+  async editLocation(e){
+    e.preventDefault();
+    const data = {location: this.state.location};
+    await Axios.post('https://minimaline-server.herokuapp.com/edit-location', data, {headers: Auth.header()}).then((response) => {
+      if(response.data.errors){
+        this.setState({
+          error: true,
+          error_msg: response.data.errors[0].msg
+        })
+      }else{
+        this.closeEdit();
+        this.getUserInfo();
+        this.setState({
+          successful: true,
+          error: false,
+          location: ''
+        })
+      }
+    })
+  }
+  async editLogo(e){
+    e.preventDefault();
+    // get secure upload url
+    await Axios.get('https://minimaline-server.herokuapp.com/request-upload')
+      .then(response => {
+        console.log(response.data.url)
+        this.setState({upload_url: response.data.url})
+      })
+    // upload img using above url
+    await Axios.put(this.state.upload_url,this.state.logo)
+      .then(response=>{
+        const imgURL = this.state.upload_url.split('?')[0]
+        console.log(imgURL)
+        this.setState({logo_url: imgURL})
+      })
+      const data = {logo: this.state.logo_url};
+      await Axios.post('https://minimaline-server.herokuapp.com/edit-logo', data, {headers: Auth.header()}).then((response) => {
+        if(response.data.errors){
+          this.setState({
+            error: true,
+            error_msg: response.data.errors[0].msg
+          })
+        }else{
+          this.closeEdit();
+          this.getUserInfo();
+          this.setState({
+            successful: true,
+            error: false,
+            logo: '',
+            upload_url: '',
+            logo_url:''
+          })
+        }
+      })
+  }
+  
+  
   render() { 
     if(this.state.redirect)
       return <Redirect to="/"/>
@@ -180,9 +265,9 @@ class ManageAccount extends Component {
                       {(this.state.editing && this.state.currentAccEdit===1) ? 
                         <Form onSubmit={this.editUsername}>
                           <p className="edit-label">Enter your new username</p>
-                          <StyledInput type="text" autoComplete="off"
+                          <StyledInput type="text" autoComplete="off" required
                             name="username" value={this.state.username}
-                            placeholder="Username" onChange={this.handleChange.bind(this)}/>
+                            placeholder={this.state.user_info["username"]} onChange={this.handleChange.bind(this)}/>
                           <div>
                             <button className="save">Save Changes</button>
                             <button className="cancel-edit" onClick={this.closeEdit}>Cancel</button>
@@ -201,9 +286,9 @@ class ManageAccount extends Component {
                       {(this.state.editing && this.state.currentAccEdit===2) ? 
                         <Form onSubmit={this.editEmail}>
                           <p className="edit-label">Enter your new e-mail</p>
-                          <StyledInput type="email" autoComplete="off"
+                          <StyledInput type="email" autoComplete="off" required
                             name="email" value={this.state.email}
-                            placeholder="E-mail" onChange={this.handleChange.bind(this)}/>
+                            placeholder={this.state.user_info["email"]} onChange={this.handleChange.bind(this)}/>
                           <div>
                             <button className="save">Save Changes</button>
                             <button className="cancel-edit" onClick={this.closeEdit}>Cancel</button>
@@ -248,9 +333,9 @@ class ManageAccount extends Component {
                     {(this.state.editing && this.state.currentStoreEdit===1) ? 
                       <Form onSubmit={this.editStoreName}>
                         <p className="edit-label">Enter store name</p>
-                        <StyledInput type="text" autoComplete="off"
+                        <StyledInput type="text" autoComplete="off" required
                             name="storename" value={this.state.storename}
-                            placeholder="Store name" onChange={this.handleChange.bind(this)}/>
+                            placeholder={this.state.user_info["store_name"]} onChange={this.handleChange.bind(this)}/>
                         <div>
                           <button className="save">Save Changes</button>
                           <button className="cancel-edit" onClick={this.closeEdit}>Cancel</button>
@@ -264,10 +349,14 @@ class ManageAccount extends Component {
 
                   <div className="block">
                     <h2 className="label">Location</h2>
+                    {this.state.successful && this.state.currentStoreEdit===2 ? <p className="successful">Successfully changed store location</p> : null}
+                    {this.state.error && this.state.currentStoreEdit===2 ? <p className="error">{this.state.error_msg}</p> : null}
                     {(this.state.editing && this.state.currentStoreEdit===2) ? 
-                      <Form>
+                      <Form onSubmit={this.editLocation}>
                         <p className="edit-label">Enter store location</p>
-                        <StyledInput placeholder="Branch"/>
+                        <StyledInput type="text" autoComplete="off" required
+                            name="location" value={this.state.location}
+                            placeholder={this.state.user_info["location"]} onChange={this.handleChange.bind(this)}/>
                         <div>
                           <button className="save">Save Changes</button>
                           <button className="cancel-edit" onClick={this.closeEdit}>Cancel</button>
@@ -281,12 +370,16 @@ class ManageAccount extends Component {
 
                   <div className="block">
                     <h2 className="label">Store Manager</h2>
+                    {this.state.successful && this.state.currentStoreEdit===3 ? <p className="successful">Successfully changed store manager</p> : null}
+                    {this.state.error && this.state.currentStoreEdit===3 ? <p className="error">{this.state.error_msg}</p> : null}
                     {(this.state.editing && this.state.currentStoreEdit===3) ? 
-                      <Form>
+                      <Form onSubmit={this.editManager}>
                         <p className="edit-label">Enter store manager's name</p>
-                        <StyledInput placeholder="Store manager"/>
+                        <StyledInput type="text" autoComplete="off" required
+                            name="manager" value={this.state.manager}
+                            placeholder={this.state.user_info["manager_name"]} onChange={this.handleChange.bind(this)}/>
                         <div>
-                          <button className="save" onClick={this.closeEdit}>Save Changes</button>
+                          <button className="save">Save Changes</button>
                           <button className="cancel-edit" onClick={this.closeEdit}>Cancel</button>
                         </div>
                       </Form> 
@@ -298,10 +391,26 @@ class ManageAccount extends Component {
 
                   <div className="block">
                     <h2 className="label">Store Logo</h2>
+                    {this.state.successful && this.state.currentStoreEdit===4 ? <p className="successful">Successfully changed store logo</p> : null}
+                    {this.state.error && this.state.currentStoreEdit===4 ? <p className="error">{this.state.error_msg}</p> : null}
+                    <img src={this.state.user_info["logo"]}/>
+                      {(this.state.editing && this.state.currentStoreEdit===4) ? 
+                        <Form onSubmit={this.editLogo}>
+                          <p className="edit-label">Upload new logo</p>
+                          <input type="file" name="logo" onChange={this.handleUpload.bind(this)}/>
+                          <div>
+                            <button className="save">Save Changes</button>
+                            <button className="cancel-edit" onClick={this.closeEdit}>Cancel</button>
+                          </div>
+                        </Form> 
+                      : <div>
+                          <button className="edit" onClick={()=>this.editThis(4)}>Edit</button> 
+                        </div> }
                   </div>
 
                   <div className="block cashier-block">
                     <h2 className="label">Cashiers</h2>
+                    <p>No cashiers have been added for your store.</p>
                     <button className="add-cashier">Add cashier</button> 
                   </div>
 
@@ -526,6 +635,10 @@ const Body = styled.div`
       background-color: #ec9736;
       color: white;
     }
+  }
+  img{
+    max-height: 200px;
+    max-width: 200px;
   }
 `;
 const Form = styled.form`
